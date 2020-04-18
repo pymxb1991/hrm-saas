@@ -7,6 +7,7 @@ import com.ihrm.domain.company.Department;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -23,6 +24,7 @@ public class DepartmentService extends BaseService {
     public void save(Department department){
         //设置主键值
         department.setId(idWorker.nextId() + "");
+        department.setCreateTime(new Date());
         //调用Dao保存部门
         departmentDao.save(department);
     }
