@@ -74,28 +74,31 @@ public class UserService {
      *
      *     根据传过来的内容动态拼接Specification，同时构造分页
      */
-    public Page<User>  findAll(Map<String,Object> map,int page,int size){
+    public Page  findAll(Map<String,Object> map,int page,int size){
         //1、查询条件
 
 
-        Specification spec = new Specification() {
+        Specification<User> spec = new Specification<User>() {
             @Override
-            public Predicate toPredicate(Root root, CriteriaQuery query, CriteriaBuilder criteriaBuilder) {
+            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
                 List<Predicate> predicates = new ArrayList<>();
                 //根据departmentId： 部门ID 构造查询条件
-                if(StringUtils.isEmpty(map.get("departmentId"))){
+                if(!StringUtils.isEmpty(map.get("departmentId"))){
                     predicates.add(criteriaBuilder.equal(root.get("departmentId").as(String.class),map.get("departmentId")));
                 }
                 //根据 companyId：  构造查询条件
-                if(StringUtils.isEmpty(map.get("companyId"))){
+                if(!StringUtils.isEmpty(map.get("companyId"))){
                     predicates.add(criteriaBuilder.equal(root.get("companyId").as(String.class),map.get("companyId")));
                 }
-                //根据请求的hasDept判断 是否分配部门 0 未分配 departmentId = null  1 已分配  departmentId != null
-                if(StringUtils.isEmpty(map.get("hasDept"))  || "0".equals((String) map.get("hasDept"))){
-                    predicates.add(criteriaBuilder.isNull(root.get("departmentId")));
-                }else {
-                    predicates.add(criteriaBuilder.isNotNull(root.get("departmentId")));
-                }
+               if(!StringUtils.isEmpty(map.get("hasDept")) ){
+                   //根据请求的hasDept判断 是否分配部门 0 未分配 departmentId = null  1 已分配  departmentId != null
+                   if("0".equals((String) map.get("hasDept"))){
+                       predicates.add(criteriaBuilder.isNull(root.get("departmentId")));
+                   }else {
+                       predicates.add(criteriaBuilder.isNotNull(root.get("departmentId")));
+                   }
+               }
+
                 //注意三个条件之间的关系是 与的关系
 
                 return criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()]));
@@ -105,7 +108,7 @@ public class UserService {
         //  2、分页
         // 注意springdata jpa 中原生的便是支持分页查询的
        //1,查询条件，2，分页的相关设置
-        Page<User> pageUser = userDao.findAll(spec, new PageRequest(page,size));
+        Page pageUser = userDao.findAll(spec, new PageRequest(page-1,size));
 
 
         return pageUser;

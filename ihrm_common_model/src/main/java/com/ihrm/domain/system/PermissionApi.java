@@ -30,7 +30,7 @@ public class PermissionApi implements Serializable {
      */
     private String apiUrl;
     /**
-     * 请求类型
+     * 请求类型  get post put delete
      */
     private String apiMethod;
     /**
