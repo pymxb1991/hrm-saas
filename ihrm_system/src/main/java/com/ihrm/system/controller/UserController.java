@@ -7,11 +7,13 @@ import com.ihrm.common.entity.ResultCode;
 import com.ihrm.company.service.CompanyService;
 import com.ihrm.domain.company.Company;
 import com.ihrm.domain.system.User;
+import com.ihrm.domain.system.response.UserResult;
 import com.ihrm.system.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,6 +34,29 @@ public class UserController extends BaseController {
     private UserService userService;
     @Autowired
     private CompanyService companyService;
+    /**
+     *  用户分配角色
+     * @param map
+     * @return
+     */
+    @RequestMapping(value = "/user/assignRoles",method = RequestMethod.PUT)
+    public Result assignRoles(@RequestBody Map<String,Object> map){
+        //1.获取被分配的用户id
+        String userId = (String)map.get("id");
+        //2.获取到角色的id列表
+        /**
+         *    由于我们使用的是springData jpa 配置的多对多
+         *  我们可以根据其内部的机制直接设置关系，自动更新就可以设置它他们之间的关系
+         */
+       // List<String> roleIds = (List<String>)map.get("roleIds ");
+        Object roleIds1 = map.get("roleIds");
+        List<String> roleIds = (List<String>) roleIds1;
+
+        //3.调用service完成角色分配
+        userService.assignRoles(userId,roleIds);
+
+        return new Result(ResultCode.SUCCESS);
+    }
     /**
      *
      * @param user
@@ -79,8 +104,16 @@ public class UserController extends BaseController {
      */
     @RequestMapping(value = "/user/{id}",method = RequestMethod.GET)
     public Result findById(@PathVariable(value = "id" ) String id){
+
         User user = userService.findById(id);
-        Result result = new Result(ResultCode.SUCCESS,user);
+        //添加 (roleIds) 用户已经有的角色  //此处可以通过构造方法来实现，这样代码看起来更加简洁；
+        UserResult userResult = new UserResult(user);
+        /*List<String> rolelist = new ArrayList<>();
+        user.getRoles().forEach(role -> {
+            rolelist.add(role.getId());
+        });
+        userResult.setRoleIds(rolelist);*/
+        Result result = new Result(ResultCode.SUCCESS,userResult);
         return result;
     }
     /**

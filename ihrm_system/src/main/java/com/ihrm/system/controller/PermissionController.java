@@ -2,11 +2,16 @@ package com.ihrm.system.controller;
 
 import com.ihrm.common.entity.Result;
 import com.ihrm.common.entity.ResultCode;
+import com.ihrm.common.exception.CommonException;
 import com.ihrm.company.service.CompanyService;
 import com.ihrm.domain.system.Permission;
+import com.ihrm.system.service.PermissionService;
 import com.ihrm.system.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * This is Description
@@ -25,44 +30,51 @@ public class PermissionController {
     private RoleService roleService;
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private PermissionService permissionService;
+
     /**
      *  添加权限
-     * @param permission
+     * @param map
      * @return
      */
     @RequestMapping(value = "/permission",method = RequestMethod.POST)
-    public Result save(@RequestBody Permission permission){
+    public Result save(@RequestBody Map<String,Object> map) throws Exception {
+        permissionService.save(map);
         return  Result.SUCCESS();//new Result(ResultCode.SUCCESS);
     }
     /**
      * 更新 permission
      */
     @RequestMapping(value = "/permission/{id}",method = RequestMethod.PUT)
-    public Result update(@PathVariable(value = "id" ) String id, @RequestBody Permission permission){
+    public Result update(@PathVariable(value = "id" ) String id, @RequestBody Map<String,Object> map) throws Exception{
+        map.put("id",id);
+        permissionService.update(map);
         return Result.SUCCESS();//new Result(ResultCode.SUCCESS);
     }
     /**
      * 删除 permission
      */
     @RequestMapping(value = "/permission/{id}",method = RequestMethod.DELETE)
-    public Result deleteById(@PathVariable(value = "id" ) String id){
+    public Result deleteById(@PathVariable(value = "id" ) String id) throws CommonException {
+        permissionService.deleteById(id);
         return  Result.SUCCESS();//new Result(ResultCode.SUCCESS);
     }
     /**
      * 根据ID 查询 permission
      */
     @RequestMapping(value = "/permission/{id}",method = RequestMethod.GET)
-    public Result findById(@PathVariable(value = "id" ) String id){
-
-        return new Result(ResultCode.SUCCESS);
+    public Result findById(@PathVariable(value = "id" ) String id) throws CommonException {
+        Map map = permissionService.findById(id);
+        return new Result(ResultCode.SUCCESS,map);
     }
     /**
      * 查询企业的权限列表
      */
     @RequestMapping(value = "/permission/list",method = RequestMethod.GET)
-    public Result findAll(){
-
-        return new Result(ResultCode.SUCCESS);
+    public Result findAll(@RequestParam Map<String,Object> map){
+        List<Permission> list = permissionService.findAll(map);
+        return new Result(ResultCode.SUCCESS,list);
     }
 
     /**

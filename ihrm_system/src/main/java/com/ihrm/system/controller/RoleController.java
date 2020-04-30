@@ -6,12 +6,14 @@ import com.ihrm.common.entity.Result;
 import com.ihrm.common.entity.ResultCode;
 import com.ihrm.company.service.CompanyService;
 import com.ihrm.domain.system.Role;
+import com.ihrm.domain.system.response.RoleResult;
 import com.ihrm.system.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * This is Description
@@ -31,6 +33,28 @@ public class RoleController extends BaseController {
     private RoleService roleService;
     @Autowired
     private CompanyService companyService;
+    /**
+     *  角色分配权限
+     * @param map
+     * @return
+     */
+    @RequestMapping(value = "/role/assignPrem",method = RequestMethod.PUT)
+    public Result assignPrem(@RequestBody Map<String,Object> map){
+        //1.获取被分配的角色id
+        String roleId = (String)map.get("roleId");
+        //2.获取到角色的id列表
+        /**
+         *    由于我们使用的是springData jpa 配置的多对多
+         *  我们可以根据其内部的机制直接设置关系，自动更新就可以设置它他们之间的关系
+         */
+      //  List<String> permIds = (List<String>)map.get("permIds ");
+        Object permId1 = map.get("ids");
+        List<String> permIds = (List<String>) permId1;
+        //3.调用service完成角色分配
+        roleService.assignPrem(roleId,permIds);
+
+        return new Result(ResultCode.SUCCESS);
+    }
     /**
      *  添加角色
      * @param role
@@ -65,8 +89,8 @@ public class RoleController extends BaseController {
     @RequestMapping(value = "/role/{id}",method = RequestMethod.GET)
     public Result findById(@PathVariable(value = "id" ) String id){
         Role role = roleService.findById(id);
-        Result result = new Result(ResultCode.SUCCESS,role);
-        return result;
+        RoleResult roleResult = new RoleResult(role);
+        return new Result(ResultCode.SUCCESS,roleResult);
     }
     /**
      * 查询企业的角色列表

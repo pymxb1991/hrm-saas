@@ -104,8 +104,8 @@
        
                 
        
-          4.  
-       
+          4.  用户列表中的状态设置
+            v-model="scope.row.accountStatus"    accountStatus 模型中的accountStatus 是哪里来的？
           5. 
           6。
        
