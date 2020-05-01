@@ -7,7 +7,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 
 /**
- * This is Description
+ * 利用jwt 生成token
  *
  * @author Mr.Mao
  * @date 2020/05/01

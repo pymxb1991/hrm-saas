@@ -38,10 +38,16 @@ public class JwtUtils {
         //2.创建jwtBuilder
         JwtBuilder jwtBuilder = Jwts.builder().setId(userId).setSubject(userName)
                 .setIssuedAt(new Date())
-                //自定义claim
-                .setClaims(map)
-                .signWith(SignatureAlgorithm.HS256, key)
-                .setExpiration(new Date(exp));
+                .signWith(SignatureAlgorithm.HS256, key);
+                //自定义claim根据MAP 设置claim
+        //注意此处 直接.setClaims(map) 会报错，跟踪发现Claims 中没有userId ,此原因是开始工具类生成token 时 直接.setClaims(map) 把userId给覆盖了，
+        //所以此处不能直接把map，直接set进去；需要遍历进行设置
+                for(Map.Entry<String, Object> entry : map.entrySet()){
+                    jwtBuilder.claim(entry.getKey(),entry.getValue());
+                }
+               // .setClaims(map)
+
+            jwtBuilder.setExpiration(new Date(exp));
         //创建token
         String token = jwtBuilder.compact();
         return  token;

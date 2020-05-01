@@ -20,4 +20,4 @@ spring:
 jwt:
   config:
     key: saas-ihrm
-    ttl: 300000
+    ttl: 360000  # 超时时间：一个小时
