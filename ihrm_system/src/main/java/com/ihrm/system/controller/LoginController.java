@@ -1,19 +1,20 @@
 package com.ihrm.system.controller;
 
+import com.ihrm.common.controller.BaseController;
 import com.ihrm.common.entity.Result;
 import com.ihrm.common.entity.ResultCode;
-import com.ihrm.common.exception.CommonException;
 import com.ihrm.common.utils.JwtUtils;
+import com.ihrm.domain.system.Permission;
 import com.ihrm.domain.system.User;
 import com.ihrm.domain.system.response.ProfileResult;
+import com.ihrm.system.service.PermissionService;
 import com.ihrm.system.service.UserService;
-import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -25,10 +26,13 @@ import java.util.Map;
 @CrossOrigin
 @RestController
 @RequestMapping(value = "/sys")
-public class LoginController {
+public class LoginController extends BaseController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PermissionService permissionService;
 
 
     @Autowired
@@ -44,6 +48,8 @@ public class LoginController {
         String mobile = (String) map.get("mobile");
         String password = (String) map.get("password");
         User user = userService.findByMobile(mobile);
+
+
         //未找到用户
         if(user == null || !user.getPassword().equals(password)){
            // throw new CommonException(Result.FAIL());
@@ -69,8 +75,8 @@ public class LoginController {
      *   前后端约定：前端请求微服务时需要添加头信息Authorization ,内容为Bearer+空格+token
      * @return
      */
-    @RequestMapping(value = "/profille",method = RequestMethod.POST)
-    public Result profille(HttpServletRequest request) throws Exception {
+    @RequestMapping(value = "/profile",method = RequestMethod.POST)
+    public Result profile(HttpServletRequest request) throws Exception {
         //首先搞一个固定的；
        // String userId = "1063705482939731968";
         /**
@@ -81,6 +87,8 @@ public class LoginController {
          *      4、 获取clamis
          *
          */
+       /*
+        第一处：此处通过拦截器来进行配置设置
         String authorization = request.getHeader("Authorization");
         if (StringUtils.isEmpty(authorization)){
             throw new CommonException(ResultCode.UNAUTHENTICATED);
@@ -90,12 +98,34 @@ public class LoginController {
         Claims claims = jwtUtils.parseJwt(token);
         //注意此处报错，跟踪发现Claims 中没有userId ,此原因是开始工具类生成token 时 直接.setClaims(map) 把userId给覆盖了，
         //所以此处需要对工具类，生成token进行修改，不能直接把map，直接set进去；需要遍历进行设置
+        */
+        //第二处，可以通过BaseController 来进行统一设置Claims
+        //Claims claims = (Claims)request.getAttribute("user_claims");
 
         String userId = claims.getId();
 
         User user = userService.findById(userId);
         //通过构造方法，把用户信息直接构造返回；
-        ProfileResult profileResult = new ProfileResult(user);
+        ProfileResult profileResult = null;
+        /**
+         *    saas平台管理员 ：所有权限 ； saasAdmin
+         *         企业管理员：企业所有权限：coAdmin
+         *         企业用户：已经分配角色的所有权限：user
+         *
+         *    注意：企业相关的所有权限可以根据权限表：
+         *      enVisible 企业可见性 0：不可见，1：可见  来进行控制；
+         */
+        if ("user".equals(user.getLevel())){
+             profileResult  = new ProfileResult(user);
+        }else {
+            //查询所有权限
+            Map map = new HashMap();
+            if("coAdmin".equals(user.getLevel())) {
+                map.put("enVisible", "1");//企业所有权限
+            }
+            List<Permission> permissions = permissionService.findAll(map);
+            return new Result(ResultCode.SUCCESS,new ProfileResult(user,permissions));
+        }
         return new Result(ResultCode.SUCCESS,profileResult);
     }
 }
