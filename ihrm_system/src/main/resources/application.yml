@@ -19,5 +19,5 @@ spring:
     open-in-view: true
 jwt:
   config:
-    key: saas-ihrm
-    ttl: 360000  # 超时时间：一个小时
+    key: Admin-Token-HRM
+    ttl: 3600000  # 超时时间：一个小时

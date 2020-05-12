@@ -77,17 +77,4 @@ public class PermissionController {
         return new Result(ResultCode.SUCCESS,list);
     }
 
-    /**
-     * 分页查询企业的权限列表
-     * 指定企业的ID
-     * 页码
-     * 页大小  每页几条数据
-     */
-    @RequestMapping(value = "/permission",method = RequestMethod.GET)
-    public Result findAll(int page,int pagesize,Permission permission){
-
-        return new Result(ResultCode.SUCCESS);
-    }
-
-
 }

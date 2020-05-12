@@ -168,7 +168,7 @@ public class PermissionService extends BaseService {
                     predicates.add(criteriaBuilder.equal(root.get("pid").as(String.class),(String)map.get("pid")));
                 }
                 //根据类型 type
-                if(!StringUtils.isEmpty("type")){
+                if(!StringUtils.isEmpty(map.get("type"))){
                     String type = (String) map.get("type");
                     //构造in 条件
                     CriteriaBuilder.In<Object> in = criteriaBuilder.in(root.get("type"));
@@ -188,7 +188,7 @@ public class PermissionService extends BaseService {
             }
         };
 
-        return permissionDao.findAll(spec);
+            return permissionDao.findAll(spec);
     }
     /**
      * 分页查询
