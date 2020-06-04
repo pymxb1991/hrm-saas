@@ -62,7 +62,7 @@ public class UserController extends BaseController {
      * @param user
      * @return
      */
-    @RequestMapping(value = "/user",method = RequestMethod.POST)
+    @RequestMapping(value = "/user",method = RequestMethod.POST,name = "POINT-USER-ADD")
     public Result save(@RequestBody User user){
 
         /**
@@ -119,7 +119,7 @@ public class UserController extends BaseController {
     /**
      * 更新 user
      */
-    @RequestMapping(value = "/user/{id}",method = RequestMethod.PUT)
+    @RequestMapping(value = "/user/{id}",method = RequestMethod.PUT,name = "POINT-USER-UPDATE")
     public Result update(@PathVariable(value = "id" ) String id, @RequestBody User user){
         // 1、 设置修改用户ID
         user.setId(id);
@@ -132,7 +132,7 @@ public class UserController extends BaseController {
     /**
      * 删除 user
      */
-    @RequestMapping(value = "/user/{id}",method = RequestMethod.DELETE)
+    @RequestMapping(value = "/user/{id}",method = RequestMethod.DELETE,name = "point-user-delete")
     public Result deleteById(@PathVariable(value = "id" ) String id){
         userService.deleteById(id);
         return new Result(ResultCode.SUCCESS);

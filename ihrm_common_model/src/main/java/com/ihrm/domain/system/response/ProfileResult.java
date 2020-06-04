@@ -6,10 +6,7 @@ import com.ihrm.domain.system.User;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Setter
 @Getter
@@ -21,9 +18,42 @@ public class ProfileResult {
   private Map<String,Object> roles = new HashMap<>();
 
   /**
+   *  当用用户所具的所有权限信息；
+   * @param user
+   * @param permissions
+   */
+  public ProfileResult(User user, List<Permission> permissions){
+    this.mobile = user.getMobile();
+    this.username = user.getUsername();
+    this.company = user.getCompanyName();
+
+    //构造返回集合
+    Set<String> menus = new HashSet<>();
+    Set<String> points = new HashSet<>();
+    Set<String> apis = new HashSet<>();
+
+    permissions.forEach(permission -> {
+      //权限类型 1为菜单 2为功能 3为API
+      String code = permission.getCode();
+      if(permission.getType() == 1){
+        menus.add(code);
+      }else if(permission.getType() == 2){
+        points.add(code);
+      }else {
+        apis.add(code);
+      }
+    });
+
+    this.roles.put("menus",menus);
+    this.roles.put("points",points);
+    this.roles.put("apis",apis);
+  }
+
+  /**
    * 构造方法，
    *    因为ProfileResult 成员变量中，所有数据在用户中都有，
    *    所以可以用用户来进行构造数据
+   *    构造企业用户所有角色权限
    * @param user
    */
   public ProfileResult(User user) {

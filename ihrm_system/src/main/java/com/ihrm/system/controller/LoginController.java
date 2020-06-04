@@ -4,7 +4,9 @@ import com.ihrm.common.controller.BaseController;
 import com.ihrm.common.entity.Result;
 import com.ihrm.common.entity.ResultCode;
 import com.ihrm.common.utils.JwtUtils;
+import com.ihrm.common.utils.PermissionConstants;
 import com.ihrm.domain.system.Permission;
+import com.ihrm.domain.system.Role;
 import com.ihrm.domain.system.User;
 import com.ihrm.domain.system.response.ProfileResult;
 import com.ihrm.system.service.PermissionService;
@@ -55,7 +57,18 @@ public class LoginController extends BaseController {
            // throw new CommonException(Result.FAIL());
             return new Result(ResultCode.MOBILEORPASSWORDERROR);
         }else {
+           //登陆成功之后，构造所有的可访问API权限
+            StringBuilder  sb = new StringBuilder(); //构造权限字符串
+            for (Role role : user.getRoles()){
+                for (Permission permission : role.getPermissions()){
+                    if(permission.getType() == PermissionConstants.PY_API){
+                        sb.append(permission.getCode()).append(",");
+                    }
+                }
+            }
+
             Map<String,Object> paramMap = new HashMap<>();
+            paramMap.put("apis",sb.toString()); //可访问的api 权限字符串
             paramMap.put("companyId",user.getCompanyId());
             paramMap.put("companyName",user.getCompanyName());
             //引用JWT 工具类生成token;需要先注入

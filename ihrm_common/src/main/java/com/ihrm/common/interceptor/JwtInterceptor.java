@@ -8,6 +8,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
@@ -66,8 +68,23 @@ public class JwtInterceptor extends HandlerInterceptorAdapter {
             Claims claims = jwtUtils.parseJwt(token);
             //3.将claims绑定到request域中
             if (claims != null) {
-                request.setAttribute("user_claims",claims);
-                return  true;
+                //通过claims 获取到当前用户的可访问的API权限字符串
+                String apis = (String)claims.get("apis"); //api-user-delete   point-user-delete
+                //比对接口名称，也就是通过@RequestMapping  的 name 属性，指定的名称，此处验证需要用到，所以如果是此种方式接口必须都进行指定 name;
+
+                //通过handle 获取方法注解，然后获取注解上的名称
+                HandlerMethod  h = (HandlerMethod)handler;
+                //获取接口上的reqeustmapping注解
+                RequestMapping methodAnnotation = h.getMethodAnnotation(RequestMapping.class);//当前方法上是什么注解，此处用什么
+                //获取当前请求接口中的name属性
+                String name = methodAnnotation.name(); //通过注解，获取注解上的name 名称；
+                //判断当前用户是否具有响应的请求权限
+                if(apis.contains(name)){
+                    request.setAttribute("user_claims",claims);
+                    return  true;
+                }else{
+                    throw new CommonException(ResultCode.UNAUTHORISE);
+                }
             }
         }
         throw new CommonException(ResultCode.UNAUTHENTICATED);

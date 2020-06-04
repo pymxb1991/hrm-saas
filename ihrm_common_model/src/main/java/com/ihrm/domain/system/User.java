@@ -91,6 +91,10 @@ public class User implements Serializable {
     private Integer inServiceStatus;
 
     private String departmentName;
+    /**
+     * 用户级别：saasAdmin，coAdmin，user
+     */
+    private String level;
 
     /**
      *  维护端注解
